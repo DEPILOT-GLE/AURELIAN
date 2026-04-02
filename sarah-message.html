@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For Sarah</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-dark: #0d0d1a;
+            --secondary-dark: #12122a;
+            --accent-cyan: #00f5ff;
+            --accent-magenta: #ff00c8;
+            --accent-yellow: #ffe600;
+            --accent-orange: #ff7e22;
+            --accent-green: #39ff14;
+            --text-light: #f0f4ff;
+            --text-muted: #9aa8cc;
+            --glow-cyan: rgba(0, 245, 255, 0.35);
+            --glow-magenta: rgba(255, 0, 200, 0.35);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--primary-dark);
+            color: var(--text-light);
+            line-height: 1.8;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        /* ─── Animated starfield background ─── */
+        #starfield {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        .star {
+            position: absolute;
+            border-radius: 50%;
+            background: #fff;
+            animation: twinkle var(--dur) infinite ease-in-out alternate;
+        }
+        @keyframes twinkle {
+            from { opacity: 0.1; transform: scale(0.8); }
+            to   { opacity: 1;   transform: scale(1.3); }
+        }
+
+        /* ─── Animated neon grid lines ─── */
+        #grid-bg {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            background-image:
+                linear-gradient(rgba(0,245,255,0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,245,255,0.04) 1px, transparent 1px);
+            background-size: 60px 60px;
+            animation: gridMove 20s linear infinite;
+        }
+        @keyframes gridMove {
+            from { background-position: 0 0; }
+            to   { background-position: 60px 60px; }
+        }
+
+        /* ─── Core Animations ─── */
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(50px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideLeft {
+            from { opacity: 0; transform: translateX(60px); }
+            to   { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes zoomIn {
+            from { opacity: 0; transform: scale(0.7); }
+            to   { opacity: 1; transform: scale(1); }
+        }
+        @keyframes neonPulse {
+            0%,100% { text-shadow: 0 0 8px var(--accent-cyan), 0 0 20px var(--accent-cyan), 0 0 40px var(--accent-cyan); }
+            50%      { text-shadow: 0 0 4px var(--accent-cyan), 0 0 10px var(--accent-cyan); }
+        }
+        @keyframes borderGlow {
+            0%,100% { border-color: var(--accent-cyan); box-shadow: 0 0 12px var(--glow-cyan), 0 0 30px var(--glow-cyan); }
+            50%      { border-color: var(--accent-magenta); box-shadow: 0 0 12px var(--glow-magenta), 0 0 30px var(--glow-magenta); }
+        }
+        @keyframes shimmer {
+            0%   { background-position: -200% center; }
+            100% { background-position: 200% center; }
+        }
+        @keyframes float {
+            0%,100% { transform: translateY(0); }
+            50%      { transform: translateY(-10px); }
+        }
+        @keyframes spinGlow {
+            from { transform: rotate(0deg); }
+            to   { transform: rotate(360deg); }
+        }
+        @keyframes particleFly {
+            0%   { opacity: 1; transform: translate(0,0) scale(1); }
+            100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(0); }
+        }
+        @keyframes btnPulse {
+            0%,100% { box-shadow: 0 0 0 0 rgba(0,245,255,0.5); }
+            50%      { box-shadow: 0 0 0 10px rgba(0,245,255,0); }
+        }
+        @keyframes wipeIn {
+            from { clip-path: inset(0 100% 0 0); }
+            to   { clip-path: inset(0 0% 0 0); }
+        }
+        @keyframes glitch {
+            0%,100% { transform: translate(0); }
+            20%     { transform: translate(-3px, 2px); }
+            40%     { transform: translate(3px, -2px); }
+            60%     { transform: translate(-2px, 3px); }
+            80%     { transform: translate(2px, -1px); }
+        }
+
+        /* ─── Slide Transition Overlay ─── */
+        #slide-transition {
+            position: fixed; inset: 0;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-magenta));
+            z-index: 200;
+            pointer-events: none;
+            opacity: 0;
+            transform: scaleX(0);
+            transform-origin: left center;
+        }
+        #slide-transition.animate-in {
+            animation: transIn 0.4s cubic-bezier(0.77,0,0.18,1) forwards;
+        }
+        #slide-transition.animate-out {
+            animation: transOut 0.4s cubic-bezier(0.77,0,0.18,1) forwards;
+        }
+        @keyframes transIn {
+            from { transform: scaleX(0); opacity: 1; }
+            to   { transform: scaleX(1); opacity: 1; }
+        }
+        @keyframes transOut {
+            from { transform: scaleX(1); opacity: 1; transform-origin: right center; }
+            to   { transform: scaleX(0); opacity: 1; transform-origin: right center; }
+        }
+
+        /* ─── Slideshow ─── */
+        .slideshow {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            z-index: 1;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            visibility: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 2rem 2rem 100px;
+            flex-direction: column;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+            transition: opacity 0.5s ease;
+        }
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .slide > * { animation: slideUp 0.7s ease both; }
+        .slide > *:nth-child(2) { animation-delay: 0.1s; }
+        .slide > *:nth-child(3) { animation-delay: 0.2s; }
+        .slide > *:nth-child(4) { animation-delay: 0.3s; }
+
+        /* ─── Hero Slide ─── */
+        .hero-center {
+            text-align: center;
+            width: 100%;
+            margin: auto;
+        }
+        .hero-center h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.5rem, 8vw, 5.5rem);
+            letter-spacing: 2px;
+            animation: neonPulse 2.5s infinite;
+            color: var(--accent-cyan);
+            margin-bottom: 0.5rem;
+        }
+        .hero-center h1 span {
+            color: var(--accent-yellow);
+            font-style: italic;
+        }
+        .hero-tagline {
+            font-size: clamp(1rem, 3vw, 1.5rem);
+            color: var(--text-muted);
+            animation: wipeIn 1s ease 0.5s both;
+        }
+        .hero-icon {
+            font-size: 4rem;
+            display: block;
+            margin: 1rem auto;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        /* ─── Content Box ─── */
+        .content-box {
+            background: rgba(18, 18, 42, 0.85);
+            padding: clamp(1.5rem, 4vw, 3rem);
+            border-radius: 20px;
+            border: 2px solid var(--accent-cyan);
+            max-width: 820px;
+            width: 100%;
+            margin: auto;
+            animation: zoomIn 0.6s ease both, borderGlow 3s ease-in-out infinite;
+            position: relative;
+            backdrop-filter: blur(10px);
+        }
+
+        /* corner glow decoration */
+        .content-box::before {
+            content: '';
+            position: absolute;
+            top: -2px; left: -2px; right: -2px; bottom: -2px;
+            border-radius: 22px;
+            background: linear-gradient(135deg, var(--accent-cyan), transparent, var(--accent-magenta));
+            z-index: -1;
+            opacity: 0.3;
+        }
+
+        h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.5rem, 4vw, 2.4rem);
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-magenta), var(--accent-yellow));
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: shimmer 3s linear infinite;
+            margin-bottom: 1.5rem;
+        }
+
+        p {
+            font-size: clamp(0.95rem, 2vw, 1.1rem);
+            margin-bottom: 1.2rem;
+            color: #c8d6f5;
+            line-height: 1.9;
+        }
+
+        .highlight {
+            color: var(--accent-yellow);
+            font-weight: 600;
+        }
+
+        /* ─── Stickers ─── */
+        .sticker {
+            position: absolute;
+            font-size: 2.8rem;
+            filter: drop-shadow(0 0 10px rgba(255,255,0,0.6));
+            animation: float 3s ease-in-out infinite;
+            z-index: 10;
+            pointer-events: none;
+        }
+        .sticker-1 { top: -18px; right: 10px; animation-delay: 0s; }
+        .sticker-2 { bottom: -18px; left: 10px; animation-delay: 0.8s; }
+        .sticker-3 { top: 40%; right: -30px; font-size: 3.5rem; animation-delay: 1.5s; }
+
+        /* ─── Pickup lines ─── */
+        .pickup-line {
+            font-style: italic;
+            background: linear-gradient(135deg, rgba(0,245,255,0.08), rgba(255,0,200,0.08));
+            padding: 1rem 1.2rem;
+            border-radius: 12px;
+            border-left: 4px solid var(--accent-yellow);
+            margin-bottom: 1rem;
+            color: var(--accent-yellow);
+            box-shadow: 0 0 12px rgba(255,230,0,0.15);
+        }
+
+        /* ─── Verses ─── */
+        .verses-grid { display: flex; flex-direction: column; gap: 1rem; }
+        .verse-card {
+            background: rgba(0, 245, 255, 0.05);
+            padding: 1.2rem 1.5rem;
+            border-radius: 14px;
+            border-left: 3px solid var(--accent-cyan);
+            box-shadow: 0 0 10px rgba(0,245,255,0.08);
+            animation: slideLeft 0.6s ease both;
+        }
+        .verse-card:nth-child(2) { animation-delay: 0.15s; }
+        .verse-card:nth-child(3) { animation-delay: 0.3s; }
+        .verse-text { font-style: italic; margin-bottom: 0.5rem; color: var(--text-light); }
+        .verse-ref { font-weight: 700; color: var(--accent-cyan); font-size: 0.9rem; margin-bottom: 0; }
+
+        /* ─── Image container ─── */
+        .image-container { display: flex; justify-content: center; margin: 1.5rem 0; }
+        .image-container img {
+            max-width: 100%; max-height: 260px;
+            border-radius: 16px;
+            box-shadow: 0 0 30px rgba(0,245,255,0.3), 0 0 60px rgba(255,0,200,0.15);
+            border: 2px solid var(--accent-cyan);
+        }
+
+        /* ─── Neon Divider ─── */
+        .neon-divider {
+            width: 100%; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent-cyan), var(--accent-magenta), transparent);
+            margin: 1.5rem 0;
+            border-radius: 2px;
+        }
+
+        /* ─── Navigation Buttons ─── */
+        .nav-btn {
+            position: fixed;
+            bottom: 30px;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-magenta));
+            color: #000;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 700;
+            font-family: 'Montserrat', sans-serif;
+            cursor: pointer;
+            z-index: 150;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: transform 0.25s, box-shadow 0.25s;
+            animation: btnPulse 2.5s infinite;
+            box-shadow: 0 4px 20px rgba(0,245,255,0.4);
+        }
+        .nav-btn:hover {
+            transform: scale(1.08) translateY(-3px);
+            box-shadow: 0 8px 30px rgba(0,245,255,0.7);
+        }
+        .next-btn { right: 30px; }
+        .prev-btn { left: 30px; display: none; }
+
+        /* ─── Slide counter ─── */
+        #slide-counter {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,245,255,0.12);
+            border: 1px solid rgba(0,245,255,0.3);
+            color: var(--accent-cyan);
+            padding: 6px 18px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            z-index: 150;
+            backdrop-filter: blur(6px);
+            letter-spacing: 1px;
+        }
+
+        /* ─── Particles ─── */
+        .particle {
+            position: fixed;
+            pointer-events: none;
+            z-index: 199;
+            border-radius: 50%;
+            width: 8px; height: 8px;
+            animation: particleFly 0.8s ease-out forwards;
+        }
+
+        /* ─── Song link ─── */
+        .song-link {
+            display: inline-block;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, rgba(0,245,255,0.12), rgba(255,0,200,0.12));
+            color: var(--accent-cyan);
+            border-radius: 8px;
+            text-decoration: none;
+            border: 1px solid var(--accent-cyan);
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+        .song-link:hover {
+            background: var(--accent-cyan);
+            color: #000;
+            box-shadow: 0 0 20px var(--glow-cyan);
+        }
+
+        /* ─── Responsive ─── */
+        @media (max-width: 768px) {
+            .nav-btn { bottom: 16px; padding: 10px 18px; font-size: 0.9rem; }
+            .next-btn { right: 16px; }
+            .prev-btn { left: 16px; }
+            .sticker-3 { display: none; }
+            .slide { padding-bottom: 80px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Starfield -->
+    <canvas id="starfield"></canvas>
+
+    <!-- Neon Grid -->
+    <div id="grid-bg"></div>
+
+    <!-- Slide Wipe Transition -->
+    <div id="slide-transition"></div>
+
+    <!-- Slide Counter -->
+    <div id="slide-counter">1 / 10</div>
+
+    <div class="slideshow" id="slideshow">
+
+        <!-- Slide 1: Hero -->
+        <div class="slide active">
+            <div class="hero-center">
+                <span class="hero-icon">✨</span>
+                <h1>Dearest <span>Sarah</span>,</h1>
+                <p class="hero-tagline">How have you been since the last time we spoke?</p>
+            </div>
+        </div>
+
+        <!-- Slide 2: Courteous Check-In -->
+        <div class="slide">
+            <div class="content-box">
+                <h2>A Courteous Check-In</h2>
+                <div class="neon-divider"></div>
+                <p>I hope this message finds you enveloped in warmth and peace. It's been a little while since we last talked, and I often find myself wondering how you are doing.</p>
+                <p>I hope your days have been gentle and that you are smiling brightly — just as beautifully as I remember. I carry our memories lightly, with a quiet smile of my own.</p>
+                <p>There is something about your presence that leaves a mark — not just on moments, but on a person's way of seeing the world. I hope you know that.</p>
+            </div>
+        </div>
+
+        <!-- Slide 3: Shared Energy -->
+        <div class="slide">
+            <div class="content-box">
+                <h2>Shared Energy &amp; Understanding</h2>
+                <div class="neon-divider"></div>
+                <p>I want you to understand that the fact I also went silent doesn't mean I gave up on you or stopped caring. <span class="highlight">I am also a plant that needs to be watered</span>, just as much as I water others.</p>
+                <p>You know how it feels to pour energy out and not receive the same in return. I am human too, and being treated coldly hurts. It brings me peace when you consider my feelings alongside yours.</p>
+                <p>Writing this to you comes from a place of great honor and from the depth of the friendship we had. If I were viewing this merely from the angle of lovers, the anger of being hurt would have clouded my words.</p>
+                <p>We were smiling together, and then suddenly, you gave up. You left without even closing the door, as if the house that contained you was no longer of importance. I didn't deserve that. But in all that, my maturity and the bond we shared dissolves those feelings, and that's why I am able to keep pushing forward in a healthy way.</p>
+            </div>
+        </div>
+
+        <!-- Slide 4: Respecting Journey -->
+        <div class="slide">
+            <div class="content-box">
+                <h2>Respecting Your Journey</h2>
+                <div class="neon-divider"></div>
+                <p>You told me you wanted to take a step back to find yourself, discover your own peace, and grow in the spirit. <span class="highlight">I want you to know how deeply I respect and admire that decision.</span></p>
+                <p>I don't want you to ever feel guilty for choosing yourself and your spiritual path. Growth is irresistible and absolutely necessary. You owe it to yourself to bloom fully.</p>
+                <p>I want you to know that choosing you, over and over again, isn't born out of desperation or weakness. It's the hallmark of <span class="highlight">a true man who stands by his words, his feelings, and his decisions</span>. I care for you deeply, and I respect your space to flourish.</p>
+            </div>
+        </div>
+
+        <!-- Slide 5: Fun & Memories -->
+        <div class="slide">
+            <div class="content-box">
+                <div class="sticker sticker-1">😂</div>
+                <div class="sticker sticker-2">💃</div>
+                <div class="sticker sticker-3">✨</div>
+                <h2>A Little Laughter</h2>
+                <div class="neon-divider"></div>
+                <p>I was thinking about us and a short funny memory crossed my mind... remember all those inside jokes? Or how we used to literally talk like our parents giving advice? It made me smile so hard my cheeks hurt.</p>
+                <p>Actually, speaking of making me smile, I have a few pickup lines for you:</p>
+                <div class="pickup-line">
+                    "Are you a Wi-Fi signal? Because despite the distance, I'm still feeling a strong connection. 📶"
+                </div>
+                <div class="pickup-line">
+                    "Do you have a map? Because I keep getting lost thinking about our conversations — and I really need you back to guide me! 🗺️"
+                </div>
+                <p>I genuinely miss making jokes and having fun with you, physically and over the phone. I miss dancing for you. Please, never feel like you were a burden or that you did something bad. You brought light.</p>
+            </div>
+        </div>
+
+        <!-- Slide 6: The Value of You -->
+        <div class="slide">
+            <div class="content-box">
+                <h2>The Value of You</h2>
+                <div class="neon-divider"></div>
+                <p>Even if a love affair isn't where we are right now, <span class="highlight">Sarah, you are so much more important than just a romantic title</span>. I genuinely miss your advice, our deep talks, and the time we spent together.</p>
+                <p>Every moment was worth it because your presence brings a profound light into my life. There is a rare kind of warmth in you that is hard to describe in ordinary words — it simply has to be experienced.</p>
+                <div class="image-container">
+                    <img src="sarah-beauty.jpg" alt="A reflection of beauty" onerror="this.style.display='none'">
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: Faith & Focus -->
+        <div class="slide">
+            <div class="content-box">
+                <h2>Faith &amp; Focus</h2>
+                <div class="neon-divider"></div>
+                <p>I took my time before I chose you, and that is why I am not giving up on you. <span class="highlight">The love we share found us when we were already happy, and we shouldn't let it just fly away.</span></p>
+                <p>I believe in myself, and I know I have exactly what it takes to take care of the woman I cherish. Despite this heartbreaking moment, I am constantly praying for you.</p>
+                <p>No one is rushing things. I, too, am focusing on the things I want to achieve as a man, and I know God is going to help us both achieve greatness. The perfections I see in you — they are real, and the vision of them is beautifully doable.</p>
+                <p>Let us both grow into the people God intended us to be, and trust that everything good connects when the time is right.</p>
+            </div>
+        </div>
+
+        <!-- Slide 8: Health Note -->
+        <div class="slide">
+            <div class="content-box">
+                <div class="sticker sticker-1">🍜</div>
+                <h2>A Gentle Reminder</h2>
+                <div class="neon-divider"></div>
+                <p>On a more practical note — and yes, this is very important to me...</p>
+                <p class="highlight" style="font-size: 1.3rem; color: var(--accent-yellow);">Please don't consume lots of indomies! 🚫</p>
+                <p>They have side effects, and the very least I want for you is to see you stay incredibly healthy, strong, and beautiful. Take care of that wonderful body of yours. You deserve the best nourishment, inside and out.</p>
+                <p>Eat real food. Sleep well. Take long walks. You matter far too much to not be taken care of — especially by yourself.</p>
+            </div>
+        </div>
+
+        <!-- Slide 9: Growing in God's Light -->
+        <div class="slide">
+            <div class="content-box">
+                <h2>Growing in God's Light</h2>
+                <div class="neon-divider"></div>
+                <p>You are perfect exactly as you are, and watching you grow is a beautiful thing. As you seek peace and spiritual elevation, remember these truths that were written for you:</p>
+                <div class="verses-grid">
+                    <div class="verse-card">
+                        <p class="verse-text">"You are altogether beautiful, my darling; there is no flaw in you."</p>
+                        <p class="verse-ref">SONG OF SOLOMON 4:7</p>
+                    </div>
+                    <div class="verse-card">
+                        <p class="verse-text">"But grow in the grace and knowledge of our Lord and Savior Jesus Christ..."</p>
+                        <p class="verse-ref">2 PETER 3:18</p>
+                    </div>
+                    <div class="verse-card">
+                        <p class="verse-text">"I praise you because I am fearfully and wonderfully made..."</p>
+                        <p class="verse-ref">PSALM 139:14</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 10: Footer -->
+        <div class="slide">
+            <div class="content-box" style="text-align: center;">
+                <h2>Yours Truly ✨</h2>
+                <div class="neon-divider"></div>
+                <p>With endless respect, unwavering care, and continuous prayers.</p>
+                <p>Wherever you are right now — I hope you feel that light. I hope this message reached you in the best possible way, with warmth and without pressure. This was written with nothing but sincerity.</p>
+                <p style="margin-top: 1.5rem; color: var(--accent-yellow); font-weight: 600; font-size: 1.1rem;">
+                    Take your time, grow beautifully, and know that good things await you. 🌟
+                </p>
+                <p style="margin-top: 2rem;">
+                    <a href="https://youtu.be/RaGpEIN-1OM?si=NViSP8fcpcPvw7ga" target="_blank" class="song-link">
+                        ▶ Listen to this song...
+                    </a>
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+    <button class="nav-btn prev-btn" id="prevBtn">⬅ Previous</button>
+    <button class="nav-btn next-btn" id="nextBtn">Next ➡</button>
+
+    <script>
+        /* ─── Starfield Canvas ─── */
+        (function() {
+            const canvas = document.getElementById('starfield');
+            const ctx = canvas.getContext('2d');
+            let stars = [];
+            function resize() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+            function createStars() {
+                stars = [];
+                for (let i = 0; i < 160; i++) {
+                    stars.push({
+                        x: Math.random() * canvas.width,
+                        y: Math.random() * canvas.height,
+                        r: Math.random() * 1.8 + 0.3,
+                        a: Math.random(),
+                        s: (Math.random() * 0.004 + 0.002) * (Math.random() < 0.5 ? 1 : -1),
+                        color: ['#fff','#00f5ff','#ff00c8','#ffe600'][Math.floor(Math.random()*4)]
+                    });
+                }
+            }
+            function draw() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                stars.forEach(st => {
+                    st.a += st.s;
+                    if (st.a <= 0 || st.a >= 1) st.s *= -1;
+                    ctx.beginPath();
+                    ctx.arc(st.x, st.y, st.r, 0, Math.PI * 2);
+                    ctx.fillStyle = st.color;
+                    ctx.globalAlpha = st.a;
+                    ctx.fill();
+                });
+                ctx.globalAlpha = 1;
+                requestAnimationFrame(draw);
+            }
+            resize();
+            createStars();
+            draw();
+            window.addEventListener('resize', () => { resize(); createStars(); });
+        })();
+
+        /* ─── Slideshow Logic ─── */
+        const slides = document.querySelectorAll('.slide');
+        const nextBtn = document.getElementById('nextBtn');
+        const prevBtn = document.getElementById('prevBtn');
+        const transOverlay = document.getElementById('slide-transition');
+        const counter = document.getElementById('slide-counter');
+        let currentSlide = 0;
+        let transitioning = false;
+
+        function updateButtons() {
+            prevBtn.style.display = currentSlide === 0 ? 'none' : 'flex';
+            nextBtn.style.display = currentSlide === slides.length - 1 ? 'none' : 'flex';
+            counter.textContent = (currentSlide + 1) + ' / ' + slides.length;
+        }
+
+        /* ─── Particle Burst ─── */
+        const colors = ['#00f5ff', '#ff00c8', '#ffe600', '#39ff14', '#ff7e22'];
+        function spawnParticles(x, y) {
+            for (let i = 0; i < 18; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle';
+                const angle = (Math.PI * 2 / 18) * i;
+                const dist = 60 + Math.random() * 80;
+                const dx = Math.cos(angle) * dist + 'px';
+                const dy = Math.sin(angle) * dist + 'px';
+                p.style.setProperty('--dx', dx);
+                p.style.setProperty('--dy', dy);
+                p.style.left = x + 'px';
+                p.style.top = y + 'px';
+                p.style.background = colors[Math.floor(Math.random() * colors.length)];
+                p.style.width = (5 + Math.random() * 7) + 'px';
+                p.style.height = p.style.width;
+                p.style.boxShadow = `0 0 8px ${p.style.background}`;
+                document.body.appendChild(p);
+                setTimeout(() => p.remove(), 850);
+            }
+        }
+
+        /* ─── Wipe Transition ─── */
+        function wipeTransition(callback) {
+            if (transitioning) return;
+            transitioning = true;
+
+            transOverlay.style.display = 'block';
+            transOverlay.className = '';
+            void transOverlay.offsetWidth; // reflow
+            transOverlay.classList.add('animate-in');
+
+            setTimeout(() => {
+                callback();
+                transOverlay.className = '';
+                void transOverlay.offsetWidth;
+                transOverlay.classList.add('animate-out');
+                setTimeout(() => {
+                    transOverlay.className = '';
+                    transitioning = false;
+                }, 420);
+            }, 380);
+        }
+
+        nextBtn.addEventListener('click', (e) => {
+            if (currentSlide < slides.length - 1) {
+                spawnParticles(e.clientX, e.clientY);
+                wipeTransition(() => {
+                    slides[currentSlide].classList.remove('active');
+                    currentSlide++;
+                    slides[currentSlide].classList.add('active');
+                    slides[currentSlide].scrollTop = 0;
+                    updateButtons();
+                });
+            }
+        });
+
+        prevBtn.addEventListener('click', (e) => {
+            if (currentSlide > 0) {
+                spawnParticles(e.clientX, e.clientY);
+                wipeTransition(() => {
+                    slides[currentSlide].classList.remove('active');
+                    currentSlide--;
+                    slides[currentSlide].classList.add('active');
+                    slides[currentSlide].scrollTop = 0;
+                    updateButtons();
+                });
+            }
+        });
+
+        updateButtons();
+    </script>
+</body>
+</html>
